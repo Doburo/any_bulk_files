@@ -1,5 +1,5 @@
-{
-   "historyGroups":[
+
+  let historyGroups = [
             {
                "index":1,
                "titleID":22331,
@@ -316,4 +316,3 @@
                "title":"Bong Bong Endorsi's Exclusive Ignition Weapon Pick-up"
             }
             ]
-}

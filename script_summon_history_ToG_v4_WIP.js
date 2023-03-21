@@ -1,10 +1,10 @@
 let gachaInfoList =[
                {
-                  "itemRarity":5,
-                  "gachaResultType":1,
-                  "chance":0.8,
-                  "color" : '#ffea89',
-                  "items":[
+                  "itemRarity":5, // leg rarity
+                  "gachaResultType":1, //chara banner
+                  "chance":0.8, //chance to obtain 
+                  "color" : '#ffea89', //colour
+                  "items":[ 
                      {
                         "itemType":4001000,
                         "name":"Green April Anaak"
@@ -68,8 +68,8 @@ let gachaInfoList =[
                   ]
                },
                {
-                  "itemRarity":5,
-                  "gachaResultType":2,
+                  "itemRarity":5, // leg rarity
+                  "gachaResultType":2,//weapon banner
                   "chance":0.2,
                   "color" : '#ffea89',
                   "items":[
@@ -172,7 +172,7 @@ let gachaInfoList =[
                   ]
                },
                {
-                  "itemRarity":4,
+                  "itemRarity":4, // rare rarity
                   "gachaResultType":1,
                   "chance":3,
                   "color" : '#c9bcef',
@@ -244,10 +244,10 @@ let gachaInfoList =[
                   ]
                },
                {
-                  "itemRarity":4,
+                  "itemRarity":4, // rare rarity
                   "gachaResultType":2,
                   "chance":2,
-                  "color" : '#c9bcef',
+                  "color" : '#c9bcef',//items 3009(4)01
                   "items":[
                      {
                         "itemType":3009401,
@@ -332,10 +332,10 @@ let gachaInfoList =[
                   ]
                },
                {
-                  "itemRarity":3,
+                  "itemRarity":3,  // uncomm rarity
                   "gachaResultType":2,
                   "chance":20,
-                  "color" : '#a4c8ff',
+                  "color" : '#a4c8ff', //items 3009(2)01
                   "items":[
                      {
                         "itemType":3009201,
@@ -436,10 +436,10 @@ let gachaInfoList =[
                   ]
                },
                {
-                  "itemRarity":2,
+                  "itemRarity":2, // comm rarity
                   "gachaResultType":2,
                   "chance":74,
-                  "color" : '#cdeaba',
+                  "color" : '#cdeaba', //items 3009(1)01
                   "items":[
                      {
                         "itemType":3009101,
@@ -504,48 +504,104 @@ let getTime = (function getDate(string){
 
    return {
       time: (string) => {
-         return `${string} ${new Date().getTime() - time_stamp} ms`;
+         console.log(`${string} ${new Date().getTime() - time_stamp} ms`)
       }
    }
 })();
 
-console.log(getTime.time('First call before for_loop:'));
-
 
 function groupDataByProperty(dataArray, propertyName) {
+
    let groupedData = {}
    for (let i=0; i<dataArray.length; i++) {
       let data = dataArray[i]
-
-      let propertyValue = propertyName instanceof Function ? key(data) : data[propertyName]
+      //do we have sort value ? if not we take 1st key of item : else value from item property
+      let propertyValue = propertyName instanceof Function ? key(data) : data[propertyName] 
      
       let tmpGroupDataArray = groupedData[propertyValue]
 
       if (!tmpGroupDataArray)
          tmpGroupDataArray = groupedData[propertyValue] = []
-      tmpGroupDataArray.push(executedData(data, i))
-   }
+      workWithData(data)
+      data.id = i
+      data.tr = createTr(data)
 
+      tmpGroupDataArray.push(data)
+   }
 
    let groups = Object.keys(groupedData)
 
    let resultingGroupedData = []
+
    for (let i=0; i<groups.length; i++) {
       let gachaName = groupedData[groups[i]][0].gachaName
-      resultingGroupedData.push({gachaName: gachaName, data: groupedData[groups[i]]})
+      let titleID = groupedData[groups[i]][0].titleID
+      resultingGroupedData.push({gachaName: gachaName, titleID: titleID, data: groupedData[groups[i]]})
    }
 
    return resultingGroupedData
 }
 
-function executedData(data, id) {
-   console.log(this)
-   data.id = id
 
-   // for(const obj of gachaInfoList){
-   //    if (data.itemType instanceof  gachaInfoList.items)
-   // }
+
+function workWithData(dataArray) {
+   const itemType = dataArray.itemType.toString()[0] == 3 ? 2 : 1
+   for (let i = 0; i < gachaInfoList.length; i++ ) {
+      if(itemType == 2){
+         dataArray.named_item_rarity = returnItemRarity(itemType, dataArray.itemType.toString()[4])
+         dataArray.item = 'Ignition Weapon'
+      }else{
+         const string = dataArray.itemType.toString().substring(1, 4)
+         dataArray.named_item_rarity = returnItemRarity(itemType, string)
+         dataArray.item = 'Character'
+      }
+         
+   }
+
+   return dataArray
 }
-console.log(groupDataByProperty(histories, 'gachaName'))
-console.log(getTime.time('End of for_loop:'));
 
+function returnItemRarity(type, string) {
+   if (type == 2) {
+      switch (string) {
+         case '1':
+            return 'Uncommon'
+         case '2':
+            return 'Rare'
+         case '4':
+            return 'Epic'
+         case '6': case '7':
+            return 'Legendary'
+         default:
+            return '0'
+      }
+   }else{
+      return ['001', '005', '012',
+          '013', '017', '021',
+          '036', '038', '040',
+          '041', '044', '051',
+          '057', '058', '094'].indexOf(string) != -1 ? 'Legendary' : 'Epic'
+   }
+}
+
+function createTr(obj) {
+   let tr = document.createElement('tr')
+       tr.classList.add(obj.named_item_rarity)
+       tr.id = obj.id
+       let time = new Date(obj.logTime).toUTCString()
+       for(const item of [obj.itemType, obj.itemName, obj.gachaName, time]){
+         tr.appendChild(createTd(item))
+       }
+
+   return tr
+}
+
+function createTd(value) {
+   let td = document.createElement('td')
+       td.textContent = value;
+   return td
+}
+
+getTime.time('First call before data changed')
+console.log(groupDataByProperty(histories, 'gachaName'))
+getTime.time('End of for_loop:')

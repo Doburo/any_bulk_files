@@ -94,7 +94,7 @@ for (const data of histories) {
             
             let itemName_content = data.itemName;//set up name collumn
             let gachaName_content = data.gachaName;//set up gacha type collumn
-            let logTime_content = new Date(data.logTime).toLocaleString('en-GB'); //convert data to human like one
+            let logTime_content = new Date(data.logTime).toUTCString(); //convert data to human like one
             
             //set up counters for every gacha type
             if (!counter[data.gachaType] && !counter['all'] && !counter[data.gachaType * 10]) {

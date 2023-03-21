@@ -1,5 +1,5 @@
 let rarity_per_name = {
-    "Legendary": ["Green April Anaak", "Khun Ran", "Sachi Faker", "Verdi", "Yuri Ha", "Hunter Rak", "Bong Bong Endorsi", "Hansung Yu", "Hwaryun", "Daniel Hatchid", "Xiaxia", "Urek Mazino", "Reflejo", "Beta", "Cassano", "Evan", "Green April (Transformed)", "Black March", "Blue Lightning Nucleus", "Hairpin of Noble Power", "White Heavenly Mirror", "Exploding Knuckle Blade", "Mad Shocker", "Bong Bong", "Thorn", "Hairpin of Shinsu Control", "Red Twin Blades", "Black Rabbit Bomb", "Mazino Wing Tree", "Frog Fisher", "Dark Shinsu's Reaper", "Living Ignition Weapon_Proto Type", "Cassano's Left Arm", "Necromance", "Crimson Rose", "Cosmic Pure Octopus", "Jahad Laevateinn", "FUG Wand", "Guardian Bow", "Blue Rune Angelic Spear", "Yihwa Yeon", "White Heavenly Mirror Khun", "Bong Bong Endorsi"],
+    "Legendary": ["Green April Anaak", "Khun Ran", "Sachi Faker", "Verdi", "Yuri Ha", "Hunter Rak", "Bong Bong Endorsi", "Hansung Yu", "Hwaryun", "Daniel Hatchid", "Xiaxia", "Urek Mazino", "Reflejo", "Beta", "Cassano", "Evan", "Green April (Transformed)", "Black March", "Blue Lightning Nucleus", "Hairpin of Noble Power", "White Heavenly Mirror", "Exploding Knuckle Blade", "Mad Shocker", "Bong Bong", "Thorn", "Hairpin of Shinsu Control", "Red Twin Blades", "Black Rabbit Bomb", "Mazino Wing Tree", "Frog Fisher", "Dark Shinsu's Reaper", "Living Ignition Weapon_Proto Type", "Cassano's Left Arm", "Necromance", "Crimson Rose", "Cosmic Pure Octopus", "Jahad Laevateinn", "FUG Wand", "Guardian Bow", "Blue Rune Angelic Spear", "Yihwa Yeon", "White Heavenly Mirror Khun", "Bong Bong Endorsi", "Jinsung Ha","Fist of the Dragon and Tiger","Bong Bong"],
     "Epic": ["Endorsi", "Hatz", "Horyang", "Miseng", "Khun A. A.", "Lo Po Bia Ren", "Rachel", "Wangnan Ja", "Laure", "Love", "Novick", "Quant Blitz", "Shibisu", "Varagav", "Mini Rak", "Boro", "Redeye Needle", "Donghae", "Shinsu Gauntlet", "Suspicious Messenger Bag", "Ren's Flail", "Yellow Lighthouse", "Cozy Blanket", "Ignition Gauntlet", "Rabbit Doll", "Blue Gloves", "Antimatter Bomb", "Twin Circle Boomerang", "Quick Gloves", "Super Lethal King Of Majesty Observer", "Rassen Kunai", "Pink Kukri", "Attract Blade", "Angelic Blade", "Dark Chaser Book", "Crown Bow"],
     "Rare": ["Chaos Dagger", "Wide Spear", "Chain Sword", "Gyro Sword", "Gyro Spear", "Rainbow Sword", "Rainbow Spear", "Bone Dagger", "Bone Blade", "Bone Stick", "Bone Rod", "Extreme Wave Stick", "Extreme Wave Twin Blades", "Angel Stick", "Meow Meow Mace", "Meow Meow Blade", "Magically-Engineered Claymore", "Magically-Engineered Spear", "Magically-Engineered Axe", "Redpoint Bow", "Blue Shinsu Rod", "Shinheuh Cutlass", "Golden Rapier", "Bluepoint Lance"],
     "Uncommon": ["Blue Rune Bow", "Pink Rune Stick", "Blue Rune Hammer", "Red Knuckles", "Blue Rune Axe", "Red Rune Sword", "Rapier", "Weak Shinsu's Claymore", "Red-Marked Kunai", "Black Iron Claymore", "Purple Rune Rod", "Blue Rune Stick"]
@@ -97,10 +97,13 @@ for (const data of histories) {
             let logTime_content = new Date(data.logTime).toUTCString(); //convert data to human like one
             
             //set up counters for every gacha type
-            if (!counter[data.gachaType] && !counter['all'] && !counter[data.gachaType * 10]) {
+            if (!counter[data.gachaType] &&
+                !counter['all'] &&
+                !counter[data.gachaType*10])
+            {
                 counter[data.gachaType] = 0
                 counter['all'] = 0;
-                counter[data.gachaType * 10] = 0;
+                counter[data.gachaType*10] = 0;
             }
             //loop for create table cell with data 
             for (const value of [itemType_content, itemName_content, gachaName_content, logTime_content]) {
@@ -116,7 +119,7 @@ for (const data of histories) {
             //qol what i'll never use....
             //sorting items by rarity in array
             item_per_rarity[rarity].push([
-                data.gachaType, 
+                data.gachaType,
                 data.itemType,
                 data.itemName,
                 data.gachaName,
@@ -160,7 +163,7 @@ for (const array of all_items) {
     //counter 
     counter.all++;
     counter[array[1]]++;
-    counter[array[1] * 10]++;
+    counter[array[1]*10]++;
     //counter
     let pity_counter = document.createElement("td");
         pity_counter.classList.add('historyPage_historyListBodyCol___et1p');
@@ -207,7 +210,6 @@ let select = document.createElement('select');
 
 let div = document.createElement('div')
 console.log(getTime.time('3 call before for_loop:'));
-
 for (const option_key of Object.keys(gacha_type)) {
     //looping keys value of gacha types (all, yeon, yeon weapon, etc)
     let option = document.createElement('option'); //creating option for selector
@@ -230,8 +232,7 @@ for (const checkbox_rarity of Object.keys(item_per_rarity)) {
     let checkbox_area = document.createElement('input');
         checkbox_area.type = 'checkbox';
         checkbox_area.id = checkbox_rarity; //id == rarity (Leg, comm)
-        checkbox_area.value = checkbox_rarity; // data for event listener
-
+/
     let label = document.createElement('label'); // lable for checkbox
         label.htmlFor = checkbox_rarity; // set up id for lable
         label.textContent = checkbox_rarity; // visible text

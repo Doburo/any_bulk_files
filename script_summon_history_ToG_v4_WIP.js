@@ -3,9 +3,10 @@ let histories = __NEXT_DATA__.props.pageProps.histories;
 let gacha_datas = __NEXT_DATA__.props.pageProps.gachaDatas;
 
 
-let title_counter = {}
+let counter = addRarityCounter()
 
-let getTime = (function getDate(string) {
+
+let getTime = (function getDate() {
    let time_stamp = new Date().getTime();
 
    return {
@@ -17,22 +18,22 @@ let getTime = (function getDate(string) {
 
 
 function groupDataByProperty(dataArray, propertyName) {
+   
    let groupedData = {}
-   title_counter.all_items_counter = dataArray.length
-   for (let i = dataArray.length - 1; i >= dataArray.length - 10; i--) {
+   counter.all_items_counter = dataArray.length
+
+   for (let i = dataArray.length - 1; i >= 0; i--) {
       let data = dataArray[i]
-      data.id = i
-
-      //do we have sort value ? if not we take 1st key of item : else value from item property
+          data.id = i
       let propertyValue = propertyName instanceof Function ? key(data) : data[propertyName]
-
       let tmpGroupDataArray = groupedData[propertyValue]
 
       if (!tmpGroupDataArray)
          tmpGroupDataArray = groupedData[propertyValue] = []
 
       workWithData(data)
-      data.counter = workWithCounter(data.titleID, data.named_item_rarity)
+
+      data.counter = counter.addCount(data.titleID, data.named_item_rarity)
       data.tr = createTr(data)
 
       tmpGroupDataArray.push(data)
@@ -46,37 +47,104 @@ function groupDataByProperty(dataArray, propertyName) {
    for (let i = 0; i < groups.length; i++) {
       let gachaName = groupedData[groups[i]][0].gachaName
       let titleID = groupedData[groups[i]][0].titleID
+      let math_data = {}
+
+      let counter_title_id = counter.categoryCounter(titleID)
+      resultingGroupedData.all_data = counter.addToAllData(counter_title_id)
+
       resultingGroupedData.push({
          gachaName: gachaName,
          titleID: titleID,
          data: groupedData[groups[i]],
-         title_counter: groupedData[groups[i]].length
+         counters: counter_title_id,
+         math_data: doMathPerCategory(groupedData[groups[i]].length, titleID)
       })
+
    }
+   resultingGroupedData.math_data = doMathPerCategory()
 
    return resultingGroupedData
 }
 
 
 
-function workWithCounter(title, rarity) {
-   !title_counter[title] ?
-      title_counter[title] = 1 : title_counter[title]++
-
-   // u idiot 
-   let rarity_c = !title_counter[rarity] ?
-      title_counter[rarity] = 1 : title_counter[rarity]++ //pity to rarity counter
-
-   if(rarity == 'Legendary'){
-      title_counter[rarity] = 1
-   }
+function addRarityCounter() {
+   let counter = {}
 
    return {
-      type_counter: title_counter[title],
-      pity_counter: rarity_c
-   }
+      addCount(title, rarity) {
 
+         if (!counter[title]) {
+            counter[title] = {
+               pity_counter: 0,
+               title_counter: 0,
+               type_counter: {},
+            }
+         }
+         
+         let type_counter = counter[title].type_counter
+         if (!type_counter[rarity]) {
+            type_counter[rarity] = 0;
+         }
+
+         counter[title].pity_counter++
+         counter[title].title_counter++
+         type_counter[rarity]++
+
+         if (rarity == 'Legendary') {
+            let temp = Object.assign({}, counter[title])
+            counter[title].pity_counter = 0
+            return temp
+         }
+         return Object.assign({}, counter[title])
+      },
+
+      addToAllData(obj){
+         if(!counter.all_data){
+            counter.all_data = {}
+         }
+         for(const rarity of Object.keys(obj.type_counter)){
+
+            let link = obj.type_counter[rarity]
+
+            if(!counter.all_data[rarity]){
+               counter.all_data[rarity] = 0
+            }
+            if(!counter.all_data.all){
+               counter.all_data.all = 0
+            }
+            counter.all_data[rarity] += link
+            counter.all_data.all += link
+         }
+         return counter.all_data
+      },
+
+      categoryCounter(title) {
+         return counter[title]
+      },
+      allCounter() {
+         return counter.all_data
+      },
+
+   }
 }
+
+function doMathPerCategory(length='', category='') {
+   let temp = {}
+   let c
+   if(length && category){
+      c = counter.categoryCounter(category).type_counter
+   }else{
+      c = counter.allCounter()
+      length = c.all
+   }
+   for (const rarity of Object.keys(c)) {
+      let string = rarity + '_percentage'
+      temp[string] = (c[rarity] / length * 100).toFixed(2)
+   }
+   return temp
+}
+
 
 function workWithData(dataArray) {
    const itemType = dataArray.itemType.toString()[0] == 3 ? 2 : 1
@@ -110,12 +178,11 @@ function returnItemRarity(type, string) {
             return '0'
       }
    } else {
-      return ['001', '005', '012',
-         '013', '017', '021',
-         '036', '038', '040',
-         '041', '044', '051',
-         '057', '058', '092',
-         '094'
+      return ['001', '005', '006', '008', '012',
+              '013', '017', '021', '022', '030',
+              '036', '038', '040', '041', '044',
+              '051', '057', '058', '080', '092',
+              '094'
       ].indexOf(string) != -1 ? 'Legendary' : 'Epic'
    }
 }
@@ -127,8 +194,8 @@ function editTable() {
 
 
    let pity = document.createElement("td");
-       pity.classList.add('historyPage_historyListHeadCol__VBbXi');
-       pity.textContent = 'Pity';
+   pity.classList.add('historyPage_historyListHeadCol__VBbXi');
+   pity.textContent = 'Pity';
 
    head_row.appendChild(pity)
 
@@ -136,8 +203,8 @@ function editTable() {
 
 function createTr(obj) {
    let tr = document.createElement('tr')
-   tr.classList.add(obj.named_item_rarity)
-   tr.id = obj.id
+       tr.classList.add(obj.named_item_rarity)
+       tr.id = obj.id
 
    let time = new Date(obj.logTime).toUTCString()
    for (const item of [obj.item, obj.itemName, obj.gachaName, time]) {
@@ -154,6 +221,6 @@ function createTd(value) {
 }
 
 getTime.time('First call before data changed')
-let group =  groupDataByProperty(histories, 'gachaName')
+let group = groupDataByProperty(histories, 'gachaName')
 console.log(group)
 getTime.time('End of for_loop:')

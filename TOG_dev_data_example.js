@@ -99,7 +99,12 @@ let gachaInfoList = [{
             },{
                "itemType": 4030000,
                "name": "Jinsung Ha"
-            }]
+            },
+            {
+               "itemType": 4158000,
+               "name": "Yura Ha"
+            }
+            ,]
          },
          {
             "itemRarity": 5, // leg rarity

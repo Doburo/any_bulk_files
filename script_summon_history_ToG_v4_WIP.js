@@ -18,13 +18,13 @@ let getTime = (function getDate() {
 
 
 function groupDataByProperty(dataArray, propertyName) {
-   
+   let item_count
    let groupedData = {}
    counter.all_items_counter = dataArray.length
 
    for (let i = dataArray.length - 1; i >= 0; i--) {
       let data = dataArray[i]
-          data.id = i
+      data.id = i
       let propertyValue = propertyName instanceof Function ? key(data) : data[propertyName]
       let tmpGroupDataArray = groupedData[propertyValue]
 
@@ -34,6 +34,8 @@ function groupDataByProperty(dataArray, propertyName) {
       workWithData(data)
 
       data.counter = counter.addCount(data.titleID, data.named_item_rarity)
+      item_count = counter.addItemCount(data.titleID, data)
+
       data.tr = createTr(data)
 
       tmpGroupDataArray.push(data)
@@ -51,12 +53,15 @@ function groupDataByProperty(dataArray, propertyName) {
 
       let counter_title_id = counter.categoryCounter(titleID)
       resultingGroupedData.all_data = counter.addToAllData(counter_title_id)
+      resultingGroupedData.all_item_data = counter.addToAllItemData(counter_title_id)
 
       resultingGroupedData.push({
          gachaName: gachaName,
          titleID: titleID,
          data: groupedData[groups[i]],
          counters: counter_title_id,
+         items_counter: item_count,
+         all_item_data: counter.allItemCounter(titleID),
          math_data: doMathPerCategory(groupedData[groups[i]].length, titleID)
       })
 
@@ -81,7 +86,7 @@ function addRarityCounter() {
                type_counter: {},
             }
          }
-         
+
          let type_counter = counter[title].type_counter
          if (!type_counter[rarity]) {
             type_counter[rarity] = 0;
@@ -99,18 +104,82 @@ function addRarityCounter() {
          return Object.assign({}, counter[title])
       },
 
-      addToAllData(obj){
-         if(!counter.all_data){
+      addItemCount(title, data) {
+         let item = data.itemName
+         let type = data.item
+
+         if (!counter[title][type]) {
+            counter[title][type] = {}
+         }
+         if (!counter[title][type][item]) {
+            counter[title][type][item] = 0
+         }
+
+         counter[title][type][item]++
+         return Object.assign({}, counter[title])
+      },
+
+      addToAllItemData(obj) {
+         if (!counter.all_item_data) {
+            counter.all_item_data = {}
+         }
+         for (const type of ['Character', 'Ignition Weapon']) {
+            let link = obj[type]
+
+
+            // i need get rid of that
+            if (!counter.all_item_data[type]) {
+               counter.all_item_data[type] = 0
+            }
+
+            if (!counter.all_item_data.characters) {
+               counter.all_item_data.characters = {
+                  'all': 0
+               }
+               counter.all_item_data.weapons = {
+                  'all': 0
+               }
+            }
+            if (!counter.all_item_data.all) {
+               counter.all_item_data.all = 0
+            }
+
+            for (const item of Object.keys(link)) {
+
+
+               counter.all_item_data[type] += link[item]
+               counter.all_item_data.all += link[item]
+               if (type == 'Character') {
+                  if (!counter.all_item_data.characters[item]) {
+                     counter.all_item_data.characters[item] = 0
+                  }
+                  counter.all_item_data.characters[item] += link[item]
+                  counter.all_item_data.characters.all += link[item]
+               } else {
+                  if (!counter.all_item_data.weapons[item]) {
+                     counter.all_item_data.weapons[item] = 0
+                  }
+                  counter.all_item_data.weapons[item] += link[item]
+                  counter.all_item_data.weapons.all += link[item]
+               }
+            }
+
+         }
+         return counter.all_item_data
+      },
+
+      addToAllData(obj) {
+         if (!counter.all_data) {
             counter.all_data = {}
          }
-         for(const rarity of Object.keys(obj.type_counter)){
+         for (const rarity of Object.keys(obj.type_counter)) {
 
             let link = obj.type_counter[rarity]
-
-            if(!counter.all_data[rarity]){
+            //i need get rid of that
+            if (!counter.all_data[rarity]) {
                counter.all_data[rarity] = 0
             }
-            if(!counter.all_data.all){
+            if (!counter.all_data.all) {
                counter.all_data.all = 0
             }
             counter.all_data[rarity] += link
@@ -125,16 +194,21 @@ function addRarityCounter() {
       allCounter() {
          return counter.all_data
       },
+      allItemCounter(titleID) {
+         console.log(titleID, counter)
+         return titleID instanceof Object ?
+            [counter.characters, counter.weapons] : [counter[titleID].characters, counter[titleID].weapons]
+      },
 
    }
 }
 
-function doMathPerCategory(length='', category='') {
+function doMathPerCategory(length = '', category = '') {
    let temp = {}
    let c
-   if(length && category){
+   if (length && category) {
       c = counter.categoryCounter(category).type_counter
-   }else{
+   } else {
       c = counter.allCounter()
       length = c.all
    }
@@ -179,10 +253,10 @@ function returnItemRarity(type, string) {
       }
    } else {
       return ['001', '005', '006', '008', '012',
-              '013', '017', '021', '022', '030',
-              '036', '038', '040', '041', '044',
-              '051', '057', '058', '080', '092',
-              '094'
+         '013', '017', '021', '022', '030', '033',
+         '036', '038', '040', '041', '044',
+         '051', '057', '058', '080', '092',
+         '094', '158'
       ].indexOf(string) != -1 ? 'Legendary' : 'Epic'
    }
 }
@@ -203,8 +277,8 @@ function editTable() {
 
 function createTr(obj) {
    let tr = document.createElement('tr')
-       tr.classList.add(obj.named_item_rarity)
-       tr.id = obj.id
+   tr.classList.add(obj.named_item_rarity)
+   tr.id = obj.id
 
    let time = new Date(obj.logTime).toUTCString()
    for (const item of [obj.item, obj.itemName, obj.gachaName, time]) {
@@ -222,5 +296,4 @@ function createTd(value) {
 
 getTime.time('First call before data changed')
 let group = groupDataByProperty(histories, 'gachaName')
-console.log(group)
 getTime.time('End of for_loop:')

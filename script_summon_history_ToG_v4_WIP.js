@@ -227,10 +227,13 @@ function workWithData(dataArray) {
       const string = dataArray.itemType.toString()[4]
       dataArray.named_item_rarity = returnItemRarity(itemType, string)
       dataArray.item = 'Ignition Weapon'
+      // add function of doing with IW
    } else {
       const string = dataArray.itemType.toString().substring(1, 4)
       dataArray.named_item_rarity = returnItemRarity(itemType, string)
       dataArray.item = 'Character'
+      // add function of doing with Chara
+
    }
 
    return true
@@ -252,12 +255,11 @@ function returnItemRarity(type, string) {
             return '0'
       }
    } else {
-      return ['001', '005', '006', '008', '012',
-         '013', '017', '021', '022', '030', '033',
-         '036', '038', '040', '041', '044',
-         '051', '057', '058', '080', '092',
-         '094', '158'
-      ].indexOf(string) != -1 ? 'Legendary' : 'Epic'
+      return ['003', '004', '010', '011', '020', 
+              '027', '049', '052', '061', '062', 
+              '064', '066', '069', '072', '073',
+              '093', '151'
+      ].indexOf(string) != -1 ?  'Epic': 'Legendary'
    }
 }
 

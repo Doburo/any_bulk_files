@@ -221,6 +221,9 @@ let gachaInfoList = [{
                "itemType": 4027000,
                "name": "Lo Po Bia Ren"
             }, {
+               "itemType": 4049000,
+               "name": "Hoaqin"
+            },{
                "itemType": 4052000,
                "name": "Rachel"
             }, {
